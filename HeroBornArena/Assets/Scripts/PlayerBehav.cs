@@ -20,6 +20,9 @@ public class PlayerBehav : MonoBehaviour
 
     private CapsuleCollider _col;
 
+    public delegate void JumpingEvent();
+    public event JumpingEvent playerJump;
+
     void Start()
     {
         
@@ -30,7 +33,7 @@ public class PlayerBehav : MonoBehaviour
 
 
 
-    // Update is called once per frame
+ 
     void Update()
     {
       
@@ -55,8 +58,9 @@ void FixedUpdate()
         if (IsGrounded() && Input.GetKeyDown(KeyCode.Space))
         {
             _rb.AddForce(Vector3.up * jumpVelocity, ForceMode.Impulse);
+            playerJump();
         }
-        
+
         Vector3 rotation = Vector3.up * hInput;
        
         Quaternion angleRot = Quaternion.Euler(rotation *
@@ -69,20 +73,20 @@ void FixedUpdate()
     }
     private bool IsGrounded()
     {
-        // 7
+       
         Vector3 capsuleBottom = new Vector3(_col.bounds.center.x,_col.bounds.min.y, _col.bounds.center.z);
-        // 8
+       
         bool grounded = Physics.CheckCapsule(_col.bounds.center,capsuleBottom, distanceToGround, groundLayer,QueryTriggerInteraction.Ignore);
-        // 9
+        
         return grounded;
     }
 
     void OnCollisionEnter(Collision collision)
     {
-        // 4
+       
         if (collision.gameObject.name == "Enemy")
         {
-            // 5
+           
             _gameManager.HP -= 1;
         }
     }

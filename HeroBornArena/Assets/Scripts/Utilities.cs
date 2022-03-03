@@ -10,7 +10,7 @@ public static class Utilities
 
     public static string UpdateDeathCount(ref int countReference)
     {
-        // 2
+        
         countReference += 1;
         return "Next time you'll be at number " + countReference;
     }
@@ -27,6 +27,11 @@ public static class Utilities
 
     public static bool RestartLevel(int sceneIndex)
     {
+        if (sceneIndex < 0)
+        {
+           
+            throw new System.ArgumentException("Scene index cannot be negative");
+        }
 
         SceneManager.LoadScene(sceneIndex);
         Time.timeScale = 1.0f;

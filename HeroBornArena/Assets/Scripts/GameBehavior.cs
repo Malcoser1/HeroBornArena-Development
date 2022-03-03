@@ -21,6 +21,9 @@ public class GameBehavior : MonoBehaviour, IManager
 
     public Stack<string> lootStack = new Stack<string>();
 
+    public delegate void DebugDelegate(string newText);
+    public DebugDelegate debug = Print;
+
 
     public string State
     {
@@ -30,12 +33,12 @@ public class GameBehavior : MonoBehaviour, IManager
 
     public int Items
     {
-        // 2
+        
         get { return _itemsCollected; }
         set
         {
             _itemsCollected = value;
-            // 2
+            
             if (_itemsCollected >= maxItems)
             {
                 labelText = "You've found all the items!";
@@ -74,20 +77,52 @@ public class GameBehavior : MonoBehaviour, IManager
     void Start()
     {
         Initialize();
+
+        InventoryList<string> inventoryList = new
+        InventoryList<string>();
+        inventoryList.SetItem("Potion");
+        Debug.Log(inventoryList.item);
     }
 
     public void Initialize()
     {
         _state = "Manager initialized..";
         _state.FancyDebug();
-        Debug.Log(_state);
+
+        debug(_state);
+        LogWithDelegate(debug);
+        
+        GameObject player = GameObject.Find("Player");
+       
+        PlayerBehav playerBehavior = player.GetComponent<PlayerBehav>();
+       
+        playerBehavior.playerJump += HandlePlayerJump;
 
         lootStack.Push("Sword of Doom");
         lootStack.Push("HP+");
         lootStack.Push("Golden Key");
         lootStack.Push("Winged Boot");
         lootStack.Push("Mythril Bracers");
+
+
     }
+
+    public void HandlePlayerJump()
+    {
+        debug("Player has jumped...");
+    }
+
+
+    public static void Print(string newText)
+    {
+        Debug.Log(newText);
+    }
+
+    public void LogWithDelegate(DebugDelegate del)
+    {
+        del("Delegating the debug task...");
+    }
+
 
     void OnGUI()
     {
@@ -109,11 +144,28 @@ public class GameBehavior : MonoBehaviour, IManager
             if (GUI.Button(new Rect(Screen.width / 2 - 100,
             Screen.height / 2 - 50, 200, 100), "You lose..."))
             {
-                Utilities.RestartLevel();
+   
+                try
+                {
+                    Utilities.RestartLevel(-1);
+                    debug("Level restarted successfully...");
+                }
+                catch (System.ArgumentException e)
+                {
+                    
+                    Utilities.RestartLevel(0);
+                    debug("Reverting to scene 0: " + e.ToString());
+                }
+                
+                finally
+                {
+                    debug("Restart handled...");
+                }
             }
         }
     }
-    public void PrintLootReport()
+
+public void PrintLootReport()
     {
         var currentItem = lootStack.Pop();
         var nextItem = lootStack.Peek();
